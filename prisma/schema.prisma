@@ -36,8 +36,8 @@ model Articles {
   articleType      String   @map("articleType")
   articleTitle     String   @map("articleTitle")
   articleSubTitle  String   @map("articleSubTitle")
-  articleContent   String   @map("articleContent") @db.Text
-  articleImageUrls String   @map("articleImageUrls")
+  articleContent   String   @map("articleContent") @db.LongText
+  articleImageUrls String   @map("articleImageUrls") @db.LongText
   isImportant      Boolean  @default(false) @map("isImportant")
   createdAt        DateTime @default(now()) @map("createdAt")
   updatedAt        DateTime @updatedAt @map("updatedAt")
