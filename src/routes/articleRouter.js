@@ -423,8 +423,8 @@ articleRouter.patch("/article/:articleId", upload.array("updateFiles"), authMidd
     }
 
     if (articleType === '동영상') {
-      if (!articleTitle || !articleContent) {
-        return res.status(401).json({ message: "필수 입력란을 모두 입력해주세요" });
+      if (!articleContent || !articleTitle || !articleType) {
+        return res.status(401).json({ message: "필수입력란을 모두 입력해주세요." });
       }
 
       await prisma.articles.update({
