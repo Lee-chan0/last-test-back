@@ -505,9 +505,11 @@ articleRouter.post("/article", upload.array("files"), authMiddleware, async (req
     const { articleTitle, articleSubTitle,
       articleContent, articleType, categoryName } = req.body;
 
-    if (!articleTitle || !articleContent ||
-      !articleType || !categoryName || !articleSubTitle) {
-      return res.status(401).json({ message: "빈칸없이 기재해주세요." });
+    if (articleType !== '동영상') {
+      if (!articleTitle || !articleContent ||
+        !articleType || !categoryName || !articleSubTitle) {
+        return res.status(401).json({ message: "빈칸없이 기재해주세요." });
+      }
     }
 
     // 동영상 타입의 경우 유튜브 링크 유효성 체크
