@@ -533,6 +533,21 @@ articleRouter.post("/article", upload.array("files"), authMiddleware, async (req
       }
     }
 
+    if (articleType === '동영상') {
+      console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', articleContent);
+
+      await prisma.articles.create({
+        data: {
+          articleTitle: articleTitle,
+          articleContent: articleContent,
+          CategoryId: findCategory.categoryId,
+          UserId: userId
+        }
+      })
+
+      return res.status(201).json({ message: "수정이 완료되었습니다." });
+    }
+
     // 추가이미지 파일은 이미 S3에 업로드 처리됨 (files 객체 처리)
     const uploadPromises = files.map(async (file) => {
       const fileExt = path.extname(file.originalname).toLowerCase();
