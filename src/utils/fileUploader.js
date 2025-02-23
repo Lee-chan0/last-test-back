@@ -29,10 +29,7 @@ const upload = multer({
     if (allowedExt.includes(fileExt) && allowedMime.includes(fileMime)) {
       return cb(null, true);
     } else {
-      // 에러를 넘기면 Express 에러 처리 미들웨어에서 status 설정을 할 수 있음
-      const err = new Error("이미지 파일만 업로드 가능합니다.");
-      err.status = 400; // HTTP 400 Bad Request
-      return cb(err);
+      return cb(new Error("이미지 파일만 업로드 가능합니다."));
     }
   }
 });
