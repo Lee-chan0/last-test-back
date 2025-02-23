@@ -423,6 +423,7 @@ articleRouter.patch("/article/:articleId", upload.array("updateFiles"), authMidd
     }
 
     if (articleType === '동영상') {
+      console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', articleContent);
 
       await prisma.articles.update({
         where: { articleId: +articleId },
