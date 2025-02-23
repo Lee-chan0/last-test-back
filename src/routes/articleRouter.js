@@ -423,7 +423,9 @@ articleRouter.patch("/article/:articleId", upload.array("updateFiles"), authMidd
     }
 
     if (articleType === '동영상') {
-      console.log('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@', articleContent);
+      if (!articleTitle || !articleContent) {
+        return res.status(401).json({ message: "필수 입력란을 모두 입력해주세요" });
+      }
 
       await prisma.articles.update({
         where: { articleId: +articleId },
@@ -431,7 +433,11 @@ articleRouter.patch("/article/:articleId", upload.array("updateFiles"), authMidd
           articleTitle: articleTitle,
           articleContent: articleContent,
           CategoryId: findCategory.categoryId,
-          UserId: userId
+          articleType: articleType,
+          UserId: userId,
+          articleSubTitle: articleSubTitle,
+          articleImageUrls: "temp",
+          articleInsideImages: "temp",
         }
       })
 
@@ -545,6 +551,9 @@ articleRouter.post("/article", upload.array("files"), authMiddleware, async (req
     }
 
     if (articleType === '동영상') {
+      if (!articleContent || !articleTitle || !articleType) {
+        return res.status(401).json({ message: "필수입력란을 모두 입력해주세요." });
+      }
 
       await prisma.articles.create({
         data: {
@@ -552,7 +561,10 @@ articleRouter.post("/article", upload.array("files"), authMiddleware, async (req
           articleContent: articleContent,
           CategoryId: findCategory.categoryId,
           articleType: articleType,
-          UserId: userId
+          UserId: userId,
+          articleSubTitle: articleSubTitle,
+          articleImageUrls: "temp",
+          articleInsideImages: "temp",
         }
       })
 
