@@ -15,6 +15,14 @@ userRouter.post('/signup', async (req, res) => {
     const SIGN_UP_CODE = process.env.CMS_SIGN_UP_CODE;
     if (!loginId || !password || !userNamePosition) return res.status(401).json({ message: "정보를 입력해주세요." });
 
+    const userPosition = userNamePosition.split(' ')[1];
+
+    if (userPosition !== '기자') {
+      return res.status(401).json({ message: "'ㅇㅇㅇ 기자'와 같이 양식에 맞춰서 작성해주세요.\n 띄어쓰기는 필수입니다." });
+    } else if (userNamePosition.length > 10) {
+      return res.status(401).json({ message: "NAME_POSITION은 10글자 이하로 작성해주세요." });
+    }
+
     if (SIGN_UP_CODE !== signUpCode) {
       return res.status(401).json({ message: "CMS_CODE가 잘못되었습니다." });
     }

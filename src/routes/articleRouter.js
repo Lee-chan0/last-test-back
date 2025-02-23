@@ -5,6 +5,7 @@ import { upload, s3 } from '../utils/fileUploader.js';
 import { PutObjectCommand } from '@aws-sdk/client-s3';
 import { v4 as uuidv4 } from 'uuid';
 import path from 'path';
+import { processArticleContent } from '../utils/processArticleContent.js';
 
 const articleRouter = express.Router();
 
@@ -471,13 +472,17 @@ articleRouter.patch("/article/:articleId", upload.array("updateFiles"), authMidd
 
     newUploadUrls.forEach((item) => (currentImages.push(item)));
 
+    const processedContent = await processArticleContent(articleContent);
+
+
     const updateArticle = await prisma.articles.update({
       where: { articleId: +articleId },
       data: {
+        articleType: articleType,
         articleTitle: articleTitle,
         articleSubTitle: articleSubTitle,
-        articleContent: articleContent,
-        articleType: articleType,
+        articleContent: processedContent.html,
+        articleInsideImages: JSON.stringify(processedContent.images),
         articleImageUrls: JSON.stringify(currentImages),
         CategoryId: +findCategory.categoryId,
         UserId: +userId
@@ -500,11 +505,11 @@ articleRouter.post("/article", upload.array("files"), authMiddleware, async (req
       articleContent, articleType, categoryName } = req.body;
 
     if (!articleTitle || !articleContent ||
-      !articleType || !categoryName || !articleSubTitle
-    ) {
+      !articleType || !categoryName || !articleSubTitle) {
       return res.status(401).json({ message: "빈칸없이 기재해주세요." });
     }
 
+    // 동영상 타입의 경우 유튜브 링크 유효성 체크
     const getVideoId = (url) => {
       if (url.includes("youtube.com/shorts/")) {
         const parts = url.split("/shorts/");
@@ -517,7 +522,7 @@ articleRouter.post("/article", upload.array("files"), authMiddleware, async (req
           }
         }
       }
-      return null; // 비디오 ID를 찾지 못한 경우
+      return null;
     };
 
     if (articleType === '동영상') {
@@ -526,12 +531,11 @@ articleRouter.post("/article", upload.array("files"), authMiddleware, async (req
         return res.status(401).json({ message: "유튜브 링크만 유효합니다." });
       }
     }
-    ////////////////////////////////////////////////////////////////////////////
 
-    // S3에 직접 업로드
+    // 추가이미지 파일은 이미 S3에 업로드 처리됨 (files 객체 처리)
     const uploadPromises = files.map(async (file) => {
-      const fileExt = path.extname(file.originalname).toLowerCase(); // 확장자 유지
-      const fileKey = `uploads/${Date.now()}_${uuidv4()}${fileExt}`; // ✅ 한글 파일명 제거, 안전한 이름 사용
+      const fileExt = path.extname(file.originalname).toLowerCase();
+      const fileKey = `uploads/${Date.now()}_${uuidv4()}${fileExt}`;
 
       const uploadParams = {
         Bucket: "my-bucket-test",
@@ -547,30 +551,33 @@ articleRouter.post("/article", upload.array("files"), authMiddleware, async (req
 
     const uploadUrls = await Promise.all(uploadPromises);
 
-    ////////////////////////////////////////////////////////////////////////////
+    // articleContent 내의 data URI 이미지를 S3에 업로드하고 URL로 치환
+    const processedContent = await processArticleContent(articleContent);
+
     let findCategory = await prisma.categories.findFirst({
       where: { categoryName }
     });
-
     if (!findCategory) {
       findCategory = await prisma.categories.create({
         data: { categoryName }
       });
     }
 
-    // 데이터베이스에 저장
+    console.log(JSON.stringify(processedContent.images));
+
+    // 데이터베이스에 저장 (articleContent 대신 processedContent 사용)
     const createArticle = await prisma.articles.create({
       data: {
         articleType,
         articleTitle,
         articleSubTitle,
-        articleContent,
+        articleContent: processedContent.html,
         articleImageUrls: JSON.stringify(uploadUrls),
+        articleInsideImages: JSON.stringify(processedContent.images),
         CategoryId: findCategory.categoryId,
         UserId: userId
       }
     });
-
     return res.status(201).json({ article: createArticle });
   } catch (e) {
     console.error(e);

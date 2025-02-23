@@ -32,15 +32,16 @@ model Categories {
 }
 
 model Articles {
-  articleId        Int      @id @default(autoincrement()) @map("articleId")
-  articleType      String   @map("articleType")
-  articleTitle     String   @map("articleTitle")
-  articleSubTitle  String   @map("articleSubTitle")
-  articleContent   String   @map("articleContent") @db.LongText
-  articleImageUrls String   @map("articleImageUrls") @db.LongText
-  isImportant      Boolean  @default(false) @map("isImportant")
-  createdAt        DateTime @default(now()) @map("createdAt")
-  updatedAt        DateTime @updatedAt @map("updatedAt")
+  articleId           Int      @id @default(autoincrement()) @map("articleId")
+  articleType         String   @map("articleType")
+  articleTitle        String   @map("articleTitle")
+  articleSubTitle     String   @map("articleSubTitle")
+  articleContent      String   @map("articleContent") @db.Text
+  articleImageUrls    String   @map("articleImageUrls") @db.Text
+  articleInsideImages String   @map("articleInsideImages") @db.Text
+  isImportant         Boolean  @default(false) @map("isImportant")
+  createdAt           DateTime @default(now()) @map("createdAt")
+  updatedAt           DateTime @updatedAt @map("updatedAt")
 
   UserId Int   @map("UserId")
   User   Users @relation(fields: [UserId], references: [userId])
