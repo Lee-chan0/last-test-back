@@ -551,6 +551,7 @@ articleRouter.post("/article", upload.array("files"), authMiddleware, async (req
           articleTitle: articleTitle,
           articleContent: articleContent,
           CategoryId: findCategory.categoryId,
+          articleType: articleType,
           UserId: userId
         }
       })
